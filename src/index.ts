@@ -1,4 +1,5 @@
 import { PDFDocument } from "pdf-lib";
+import { writeFile } from "fs/promises";
 
 async function flattenForm() {
   const formUrl = "https://pdf-lib.js.org/assets/form_to_flatten.pdf";
@@ -21,7 +22,12 @@ async function flattenForm() {
 
   form.flatten();
 
-  await pdfDoc.save();
+  const pdfBytes = await pdfDoc.save();
+
+  // Write the PDF to a file
+  await writeFile("flattened-form.pdf", pdfBytes);
+
+  console.log("PDF saved to flattened-form.pdf");
 }
 
 flattenForm().catch((err: unknown) => {
