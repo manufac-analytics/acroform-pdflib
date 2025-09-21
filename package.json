@@ -15,6 +15,9 @@
     "start": "tsc-watch --onSuccess 'node .'",
     "test": "jest"
   },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  },
   "devDependencies": {
     "@manufac/eslint-config": "^4.5.0",
     "@manufac/prettier-config": "^1.7.0",
