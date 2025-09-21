@@ -1,5 +1,5 @@
-import { PDFDocument } from "pdf-lib";
-import { writeFile } from "fs/promises";
+import { PDFDocument, type PDFTextField } from "pdf-lib";
+import { writeFile, readFile } from "fs/promises";
 
 async function flattenForm() {
   const formUrl = "https://pdf-lib.js.org/assets/form_to_flatten.pdf";
@@ -30,6 +30,48 @@ async function flattenForm() {
   console.log("PDF saved to flattened-form.pdf");
 }
 
+async function flattenLocalForm() {
+  // Read the local PDF file
+  const pdfBytes = await readFile("sample.pdf");
+
+  const pdfDoc = await PDFDocument.load(pdfBytes);
+  const form = pdfDoc.getForm();
+
+  // Get all form fields to see what's available
+  const fields = form.getFields();
+  console.log("Available form fields:");
+  fields.forEach((field) => {
+    console.log(`- ${field.getName()} (${field.constructor.name})`);
+  });
+
+  // Fill the given name field
+  try {
+    const givenNameField = fields.find((field) => {
+      const fieldName = field.getName().toLowerCase();
+      return fieldName.includes("given") || fieldName.includes("first");
+    });
+
+    if (givenNameField && givenNameField.constructor.name === "PDFTextField") {
+      const textField = givenNameField as PDFTextField;
+      textField.setText("John");
+      console.log(`Filled field "${givenNameField.getName()}" with "John"`);
+    } else {
+      console.log("No given name field found");
+    }
+
+    form.flatten();
+    const flattened = await pdfDoc.save();
+    await writeFile("flattened-local-form.pdf", flattened);
+    console.log("PDF saved to flattened-local-form.pdf");
+  } catch (error) {
+    console.error("Error processing form:", error);
+  }
+}
+
 flattenForm().catch((err: unknown) => {
+  console.log(err);
+});
+
+flattenLocalForm().catch((err: unknown) => {
   console.log(err);
 });
